@@ -13,17 +13,23 @@ if [ -n "$GOOGLE_CLIENT_ID" ]; then
     sed -i -e "s/;clientsecret=YOUR_GOOGLE_APP_SECRET/clientsecret=$GOOGLE_CLIENT_SECRET/" ~/.skicka.config
 fi
 
+echo "existing files in $DOWNLOAD_FROM :"
+find $DOWNLOAD_FROM -type f
+
 if [ -n "$DOWNLOAD_FROM" ]; then
     echo 'Input download-from has been specified. This action will run the download.'
+    echo skicka -no-browser-auth download -ignore-times "$DOWNLOAD_FROM" "$DOWNLOAD_TO"
     skicka -no-browser-auth download -ignore-times "$DOWNLOAD_FROM" "$DOWNLOAD_TO"
 elif [ -n "$UPLOAD_TO" ]; then
     echo 'Input upload-to has been specified. This action will run the upload.'
+    echo skicka -no-browser-auth upload -ignore-times "$UPLOAD_FROM" "$UPLOAD_TO"
     skicka -no-browser-auth upload -ignore-times "$UPLOAD_FROM" "$UPLOAD_TO"
 
     # Remove outdated
     if [ $REMOVE_OUTDATED == "true" ]; then
         # This command will download files that don't exist locally,
         # and remove files from downloaded files list.
+        echo 'removing outdated...'
         skicka -verbose download -ignore-times "$UPLOAD_TO" "$UPLOAD_FROM" 2>&1 | \
             sed "/Downloaded and wrote/!d" | \
             sed -E "s/.*bytes to //" | \
